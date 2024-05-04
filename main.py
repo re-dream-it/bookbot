@@ -50,7 +50,6 @@ def law(message):
         # Добавляем жанр.
         if(not db.check_genre(message.text)):
             db.add_genre(message.text)
-            db.set_status(message.chat.id, '0')
             keyboard = types.InlineKeyboardMarkup()
             genres = db.get_genres()
             
@@ -59,7 +58,8 @@ def law(message):
                 keyboard.add(button)
 
             keyboard.add(buttons.genre_add_button)
-            bot.send_message(message.chat.id, 'Жанр успешно добавлен, теперь выберите жанр для книги:')
+            bot.send_message(message.chat.id, 'Жанр успешно добавлен, теперь выберите жанр для книги:', reply_markup = keyboard)
+            db.set_status(message.chat.id, '0')
         else:
             bot.send_message(message.chat.id, '❗️ Данный жанр уже существует!')
         
@@ -72,6 +72,26 @@ def callback_inline(call):
         back_button = types.InlineKeyboardButton('Назад', callback_data = 'back:add_genre')
         keyboard = types.InlineKeyboardMarkup().add(back_button)
         bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id, text = 'Введите название нового жанра:', reply_markup = keyboard)
+
+    # Обработка кнопок назад
+    if 'back:' in call.data:
+        payload = call.data.split(':')
+        
+        # Выбор жанра < Добавление жанра
+        if payload[1] == 'add_genre':
+            # Предлагаем выбрать жанр книги.
+            keyboard = types.InlineKeyboardMarkup()
+            genres = db.get_genres()
+            
+            for genre in genres:
+                button = types.InlineKeyboardButton(genre[1], callback_data = 'genre_chosen:' + str(genre[0]))
+                keyboard.add(button)
+
+            keyboard.add(buttons.genre_add_button)
+            bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id, text = 'Выберите жанр книги или добавьте новый: ', reply_markup = keyboard)
+            db.set_status(call.message.chat.id, '0')
+            
+            
 
     
 
