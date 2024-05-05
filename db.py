@@ -72,4 +72,15 @@ class DB:
 				result = self.cursor.execute(request).fetchall()
 				return result
 			
-print('SQLite OK')
+	def add_book(self, title, author, genre_id):
+		# Добавление пользователя в БД.
+		with self.connection:
+			with lock:
+				return self.cursor.execute("INSERT INTO `books` (`title`, `author`, `genre_id`) VALUES(?,?,?)", (title, author, genre_id,))
+			
+	def get_all_books(self):
+		# Получения списка всех книг.
+		with self.connection:
+			with lock:
+				return self.cursor.execute("SELECT * FROM `books`").fetchall()
+			
