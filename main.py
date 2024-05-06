@@ -235,17 +235,10 @@ def callback_inline(call):
             keyboard.add(buttons.filter_button)
             bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id, text = '🔹 Книг найдено: ' + str(len(books)) + '\n\n🔹 Выберите книгу из списка: ', reply_markup = keyboard)
 
-
-# Украсить все эмодзями !!!!!!!!!!!!!!!!!!!!!!!!
-# Составить инструкцию на гитхабе !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-bot.polling(non_stop = True, interval = 0)
-
-# while True:
-#     try:
-#         bot.polling(non_stop = True, interval = 0)
-#     except Exception as e:
-#         print(e)
-#         # Дописать логирование ошибок в txt                         
-#         time.sleep(3)
-#         continue
+while True:
+    try:
+        bot.polling(non_stop = True, interval = 0)
+    except Exception as e:
+        print(e)                    
+        time.sleep(3)
+        continue
