@@ -1,1 +1,1 @@
-token = '6457035682:AAHPcdIPF0cqRDVYGgY4DwMG7fevabGzO-Q' # API токен бота
+token = '' # API токен бота

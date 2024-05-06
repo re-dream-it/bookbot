@@ -11,4 +11,4 @@ book_add_button = types.KeyboardButton('➕ Добавить книгу')
 
 # Inline кнопки
 genre_add_button = types.InlineKeyboardButton('➕ Добавить жанр', callback_data = 'add_genre')
-filter_button = types.InlineKeyboardButton('Выбрать жанр', callback_data = 'choose_filter')
+filter_button = types.InlineKeyboardButton('⚙️ Выбрать жанр', callback_data = 'choose_filter')

@@ -63,13 +63,19 @@ class DB:
 				result = self.cursor.execute('SELECT * FROM `genres` WHERE `name` = ?', (name,)).fetchall()
 				return bool(len(result))
 	
-	def get_genres(self):
-		# Получение всех строк жанров с указанным лимитом.
+	def get_all_genres(self):
+		# Получение всех строк жанров.
 		with self.connection:
 			with lock:
 				request = 'SELECT * FROM `genres`'
 				result = self.cursor.execute(request).fetchall()
 				return result
+			
+	def get_genre_name(self, id):
+		# Получения статуса пользователя.
+		with self.connection:
+			with lock:
+				return self.cursor.execute("SELECT `name` FROM `genres` WHERE `id` = ?", (id,)).fetchone()[0]
 			
 	def add_book(self, title, author, description, genre_id):
 		# Добавление пользователя в БД.
@@ -87,5 +93,22 @@ class DB:
 		# Получения статуса пользователя.
 		with self.connection:
 			with lock:
-				return self.cursor.execute("SELECT * FROM `books` WHERE `id` = ?", (id,)).fetchone()[0]
+				return self.cursor.execute("SELECT * FROM `books` WHERE `id` = ?", (id,)).fetchone()
 			
+	def delete_book(self, id):
+		with self.connection:
+			with lock:
+				return self.cursor.execute("DELETE FROM books WHERE `id` = ?", (id,)).fetchone()
+			
+	def get_genre_books(self, genre_id):
+		# Получения списка всех книг.
+		with self.connection:
+			with lock:
+				return self.cursor.execute("SELECT * FROM `books` WHERE `genre_id` = ?", (genre_id,)).fetchall()
+			
+	def search_books(self, keyword):
+		# Получения списка книг, найденных по ключевому слову.
+		keyword = '%' + keyword + '%'
+		with self.connection:
+			with lock:
+				return self.cursor.execute("SELECT * FROM `books` WHERE `author` LIKE ? OR `title` LIKE ?", (keyword, keyword,)).fetchall()
