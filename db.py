@@ -35,8 +35,7 @@ class DB:
 		# Получение всех строк пользователей с указанным лимитом.
 		with self.connection:
 			with lock:
-				request = 'SELECT * FROM `user` LIMIT ' + limit
-				result = self.cursor.execute(request).fetchall()
+				result = self.cursor.execute('SELECT * FROM `user` LIMIT ' + str(limit)).fetchall()
 				return result
 
 	def set_status(self, uid, status):
@@ -72,15 +71,21 @@ class DB:
 				result = self.cursor.execute(request).fetchall()
 				return result
 			
-	def add_book(self, title, author, genre_id):
+	def add_book(self, title, author, description, genre_id):
 		# Добавление пользователя в БД.
 		with self.connection:
 			with lock:
-				return self.cursor.execute("INSERT INTO `books` (`title`, `author`, `genre_id`) VALUES(?,?,?)", (title, author, genre_id,))
+				return self.cursor.execute("INSERT INTO `books` (`title`, `author`, `description`, `genre_id`) VALUES(?,?,?,?)", (title, author, description, genre_id,))
 			
 	def get_all_books(self):
 		# Получения списка всех книг.
 		with self.connection:
 			with lock:
 				return self.cursor.execute("SELECT * FROM `books`").fetchall()
+			
+	def get_book(self, id):
+		# Получения статуса пользователя.
+		with self.connection:
+			with lock:
+				return self.cursor.execute("SELECT * FROM `books` WHERE `id` = ?", (id,)).fetchone()[0]
 			

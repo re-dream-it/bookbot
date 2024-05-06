@@ -33,29 +33,51 @@ def law(message):
 def law(message):
     status = db.get_status(message.chat.id)
 
-    if message.text == '➕ Добавить книгу' and status == '0':
-        # Предлагаем выбрать жанр книги.
-        keyboard = types.InlineKeyboardMarkup()
-        genres = db.get_genres()
-        
-        for genre in genres:
-            button = types.InlineKeyboardButton(genre[1], callback_data = 'genre_chosen:' + str(genre[0]))
-            keyboard.add(button)
-
-        keyboard.add(buttons.genre_add_button)
-        bot.send_message(message.chat.id, 'Выберите жанр книги или добавьте новый: ', reply_markup = keyboard)
-
-    # Добавляем жанр.
-    elif status == 'add_genre' and message.text:
-        if(not db.check_genre(message.text)):
-            db.add_genre(message.text)
+    if status == '0':
+        if message.text == '➕ Добавить книгу':
+            # Предлагаем выбрать жанр для книги, которую необходимо добавить.
             keyboard = types.InlineKeyboardMarkup()
             genres = db.get_genres()
             
+            # Формируем клавиатуру из строк жанров, полученных из БД.
             for genre in genres:
                 button = types.InlineKeyboardButton(genre[1], callback_data = 'genre_chosen:' + str(genre[0]))
                 keyboard.add(button)
 
+            # Добавляем кнопку "Добавить жанр" и отправляем сообщение.
+            keyboard.add(buttons.genre_add_button)
+            bot.send_message(message.chat.id, 'Выберите жанр книги или добавьте новый: ', reply_markup = keyboard)
+
+        if message.text == '📖 Список книг':
+            # Выводим список всех книг.
+            books = db.get_all_books()
+            keyboard = types.InlineKeyboardMarkup()
+
+            # Формируем клавиатуру из книг, полученных из БД.
+            for book in books:
+                button = types.InlineKeyboardButton('"' + book[1] + '", ' + str(book[2]), callback_data = 'book_chosen:' + str(book[0]))
+                keyboard.add(button)
+
+            # Добавляем кнопку "Выбрать жанр" и отправляем сообщение.
+            keyboard.add(buttons.filter_button)
+            bot.send_message(message.chat.id, 'Список книг: ', reply_markup = keyboard)
+
+    elif status == 'add_genre' and message.text:
+        # Добавляем жанр.
+
+        # Проверяем существование такого жанра в БД.
+        if(not db.check_genre(message.text)):
+            # Вносим жанр в БД.
+            db.add_genre(message.text)
+            keyboard = types.InlineKeyboardMarkup()
+            genres = db.get_genres()
+            
+            # Формируем клавиатуру из строк жанров, полученных из БД.
+            for genre in genres:
+                button = types.InlineKeyboardButton(genre[1], callback_data = 'genre_chosen:' + str(genre[0]))
+                keyboard.add(button)
+
+            # Добавляем кнопку "Добавить жанр" и отправляем сообщение, обнуляем статус.
             keyboard.add(buttons.genre_add_button)
             bot.send_message(message.chat.id, 'Жанр успешно добавлен, теперь выберите жанр для книги:', reply_markup = keyboard)
             db.set_status(message.chat.id, '0')
@@ -71,7 +93,7 @@ def law(message):
         # Проверка соответствия формата
         if len(book) == 3:
             # Добавляем книгу в базу данных, отправляем сообщение.
-            db.add_book(book[0], book[1], book[2])
+            db.add_book(book[0], book[1], book[2], payload)
             bot.send_message(message.chat.id, 'Книга успешно добавлена!')
             db.set_status(message.chat.id, '0') 
         else: 
@@ -104,24 +126,35 @@ def callback_inline(call):
             bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id, text = 'Выберите жанр книги или добавьте новый: ', reply_markup = keyboard)
             db.set_status(call.message.chat.id, '0')
 
-    # Выбор жанра.
+    # Выбран жанр для добавления книги.
     elif 'genre_chosen:' in call.data:
         # Получаем id жанра.
         payload = call.data.split(':')[1]
-
         # Задаем статус ожидания книги и редактируем сообщение.
         db.set_status(call.message.chat.id, 'add_book:' + str(payload))
         back_button = types.InlineKeyboardButton('Назад', callback_data = 'back:add_book')
         keyboard = types.InlineKeyboardMarkup().add(back_button)
         bot.edit_message_text(chat_id = call.message.chat.id, message_id = call.message.message_id, text = '**Введите информацию о книге в следующем формате:**\n\n`Название книги\n\nАвтор книги\n\nОписание книги`', reply_markup = keyboard, parse_mode = 'markdown')
 
+    # Выбрана книга.
+    elif 'book_chosen:' in call.data:
+        # Получаем информацию о книге
+        payload = call.data.split(':')[1]
+        db.get_book(payload)
+
+        # ДОДЕЛАТЬДОДЕЛАТЬДОДЕЛАТЬДОДЕЛАТЬДОДЕЛАТЬДОДЕЛАТЬДОДЕЛАТЬДОДЕЛАТЬДОДЕЛАТЬДОДЕЛАТЬДОДЕЛАТЬДОДЕЛАТЬДОДЕЛАТЬ
+
+
+
+
+
 bot.polling(non_stop = True, interval = 0)
 
 # while True:
 #     try:
-#         bot.polling(non_stop=True, interval=0)
+#         bot.polling(non_stop = True, interval = 0)
 #     except Exception as e:
 #         print(e)
-#         # Дописать логирование ошибок в txt
+#         # Дописать логирование ошибок в txt                         
 #         time.sleep(3)
 #         continue
